@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private void saveNote() {
         mNote.setCourse((CourseInfo) mspinnerCourses.getSelectedItem());
         mNote.setTitle(mtextNoteTitle.getText().toString());
-        mNote.setTitle(mtextNoteText.getText().toString());
+        mNote.setText(mtextNoteText.getText().toString());
     }
 
     private void displayNote(Spinner spinnerCourses, EditText textNoteTitle, EditText textNoteText) {
