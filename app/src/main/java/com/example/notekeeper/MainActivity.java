@@ -2,25 +2,27 @@ package com.example.notekeeper;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String NOTE_INFO = "com.example.notekeeper.NOTE_INFO";
+    public static final String NOTE_POSITION = "com.example.notekeeper.NOTE_POSITION";
+    public static final int POSITION_NOT_SET = -1;
     private NoteInfo mNote;
     private boolean misNewNote;
+    private Spinner mspinnerCourses;
+    private EditText mtextNoteTitle;
+    private EditText mtextNoteText;
+    private int mnewPosition;
+    private boolean mIsCanceling;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,21 +31,40 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Spinner spinnerCourses = findViewById(R.id.spinner_courses);
+        mspinnerCourses = findViewById(R.id.spinner_courses);
         List<CourseInfo> courses = DataManager.getInstance().getCourses();
         ArrayAdapter<CourseInfo> adapterCourses = new
                 ArrayAdapter<>(this, android.R.layout.simple_spinner_item,courses);
         adapterCourses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCourses.setAdapter(adapterCourses);
+        mspinnerCourses.setAdapter(adapterCourses);
         
         readDisplayStateValue();
-        EditText textNoteTitle = findViewById(R.id.text_note_title);
-        EditText textNoteText = findViewById(R.id.text_note_text);
+        mtextNoteTitle = findViewById(R.id.text_note_title);
+        mtextNoteText = findViewById(R.id.text_note_text);
 
         if(!(misNewNote)){
-            displayNote(spinnerCourses, textNoteTitle, textNoteText);
+            displayNote(mspinnerCourses, mtextNoteTitle, mtextNoteText);
         }
 
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mIsCanceling) {
+            if(misNewNote) {
+                DataManager.getInstance().removeNote(mnewPosition);
+            }
+        }else {
+            saveNote();
+        }
+    }
+
+    private void saveNote() {
+        mNote.setCourse((CourseInfo) mspinnerCourses.getSelectedItem());
+        mNote.setTitle(mtextNoteTitle.getText().toString());
+        mNote.setTitle(mtextNoteText.getText().toString());
     }
 
     private void displayNote(Spinner spinnerCourses, EditText textNoteTitle, EditText textNoteText) {
@@ -57,8 +78,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void readDisplayStateValue() {
         Intent intent = getIntent();
-        mNote = intent.getParcelableExtra(NOTE_INFO);
-        misNewNote = mNote == null;
+        int position = intent.getIntExtra(NOTE_POSITION, POSITION_NOT_SET);
+        misNewNote = position == POSITION_NOT_SET;
+        if(misNewNote){
+            createNewNote();
+        }else{
+            mNote = DataManager.getInstance().getNotes().get(position);
+        }
+    }
+
+    private void createNewNote() {
+        DataManager dm = DataManager.getInstance();
+        mnewPosition = dm.createNewNote();
+        mNote =dm.getNotes().get(mnewPosition);
+
     }
 
     @Override
@@ -76,10 +109,26 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_send_mail) {
+            sendEmail();
             return true;
+        }else if(id == R.id.action_cancel){
+            mIsCanceling = true;
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void sendEmail() {
+        CourseInfo course = (CourseInfo) mspinnerCourses.getSelectedItem();
+        String subject = mtextNoteTitle.getText().toString();
+        String body = "Check out what I learnt in this pluralsight course \""
+                + course.getTitle() + "\"\n" + mtextNoteText.getText().toString();
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("message/rfc2822");
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, body);
+        startActivity(intent);
     }
 }
