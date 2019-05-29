@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorAccent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
@@ -23,9 +24,12 @@
         android:id="@+id/text_note_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:ems="10"
         android:hint="Note Title"
         android:inputType="textMultiLine"
+        android:textColorHint="@color/colorPrimaryDark"
+        android:textColorLink="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="@+id/spinner_courses"
         app:layout_constraintStart_toStartOf="@+id/spinner_courses"
         app:layout_constraintTop_toBottomOf="@+id/spinner_courses" />
@@ -34,9 +38,12 @@
         android:id="@+id/text_note_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:ems="10"
         android:hint="Note Text"
         android:inputType="textMultiLine"
+        android:textColorHint="@color/colorPrimaryDark"
+        android:textColorLink="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="@+id/text_note_title"
         app:layout_constraintStart_toStartOf="@+id/text_note_title"
         app:layout_constraintTop_toBottomOf="@+id/text_note_title" />
